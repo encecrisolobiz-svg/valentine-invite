@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine Invitation</title>
+
+  <!-- Fancy Valentine Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background: white;
+      color: black;
+      font-family: 'Playfair Display', serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .container {
+      position: relative;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    h1 {
+      font-weight: 500;
+      font-size: clamp(26px, 6vw, 38px);
+      margin-bottom: 32px;
+    }
+
+    .highlight {
+      color: red;
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(34px, 8vw, 48px);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 14px 28px;
+      font-size: 16px;
+      cursor: pointer;
+      border: 1px solid black;
+      background: white;
+      border-radius: 999px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .yesBtn {
+      background: red;
+      color: white;
+      border: 1px solid red;
+    }
+
+    #noBtn {
+      position: absolute;
+    }
+
+    .section-page {
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .hidden {
+      opacity: 0;
+      transform: translateY(25px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+
+    .visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .itinerary {
+      text-align: left;
+      line-height: 1.6;
+      font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .itinerary h2 {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .music-btn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti"></canvas>
+
+  <!-- Music -->
+  <audio id="bgMusic" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mpeg">
+  </audio>
+
+  <button class="music-btn" id="musicBtn">Play Music</button>
+
+  <div class="container" id="container">
+
+    <!-- QUESTION -->
+    <div id="questionSection" class="section-page visible">
+      <h1>
+        Will you be my <span class="highlight">Valentine</span>, Vince?
+      </h1>
+
+      <div class="buttons">
+        <button class="yesBtn" id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+      </div>
+    </div>
+
+    <!-- ITINERARY -->
+    <div class="itinerary section-page hidden" id="itinerarySection">
+      <h2><span class="highlight">Baguio City</span></h2>
+      <div id="typeText"></div>
+    </div>
+  </div>
+
+  <script>
+    const itineraryFull = `Feb 14 to 15
+
+Short Itinerary
+
+Arrival:
+Photobooth Hunting (Pines Arcade, Session Rd.)
+Flower Hunting (Baguio Market) (wanted to order from here and have it delivered to us, but it's just too exp hehe)
+
+Dinner:
+Juan's Roast Beef
+
+After Dinner:
+Go back to Airbnb so you can be my dessert ehe
+
+Feb 15:
+Free Dayyyyyyy
+Bowling and/or Billiards (Puyat Sports Center Mall)
+
+Please pack light, the the hard pack to me sksk`;
+
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const container = document.getElementById('container');
+    const questionSection = document.getElementById('questionSection');
+    const itinerarySection = document.getElementById('itinerarySection');
+    const typeText = document.getElementById('typeText');
+
+    const music = document.getElementById('bgMusic');
+    const musicBtn = document.getElementById('musicBtn');
+
+    /* MUSIC */
+    musicBtn.onclick = () => {
+      music.play();
+      musicBtn.innerText = 'Music Playing';
+    };
+
+    window.addEventListener('load', () => {
+      music.play().catch(()=>{});
+    });
+
+    /* TYPEWRITER */
+    function typeWriter(text, speed = 18) {
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          typeText.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    /* CONFETTI HEART BURST */
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+
+    function createConfetti() {
+      for (let i = 0; i < 120; i++) {
+        particles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          size: Math.random() * 6 + 4,
+          speedX: (Math.random() - 0.5) * 8,
+          speedY: (Math.random() - 0.5) * 8,
+          life: 100
+        });
+      }
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p, index) => {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.life--;
+
+        if (p.life <= 0) particles.splice(index, 1);
+      });
+
+      requestAnimationFrame(drawConfetti);
+    }
+
+    drawConfetti();
+
+    /* NO BUTTON CHAOS + EASTER EGG */
+    let speedMultiplier = 1;
+    let chaosTimer;
+    let attempts = 0;
+
+    function moveButton() {
+      const rect = container.getBoundingClientRect();
+      const maxX = rect.width - noBtn.offsetWidth;
+      const maxY = 250;
+
+      noBtn.style.left = Math.random() * maxX + 'px';
+      noBtn.style.top = Math.random() * maxY + 'px';
+    }
+
+    function chaos() {
+      attempts++;
+      speedMultiplier += 0.6;
+
+      clearInterval(chaosTimer);
+      chaosTimer = setInterval(moveButton, Math.max(60, 300 / speedMultiplier));
+
+      // Easter egg if they somehow persist
+      if (attempts > 10) {
+        alert('Grabe ah. Determined ka mag No? 😏 Try mo ulit yung Yes.');
+      }
+    }
+
+    noBtn.onmouseenter = chaos;
+    noBtn.onclick = chaos;
+
+    /* YES CLICK */
+    yesBtn.onclick = () => {
+      music.play().catch(()=>{});
+
+      createConfetti();
+
+      questionSection.classList.replace('visible', 'hidden');
+
+      setTimeout(() => {
+        itinerarySection.classList.replace('hidden', 'visible');
+        typeWriter(itineraryFull);
+      }, 400);
+    };
+  </script>
+
+</body>
+</html>
